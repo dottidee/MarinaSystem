@@ -1,7 +1,13 @@
 import tkinter as tk
 import datetime
+import mysql.connector
 
-
+#
+# FingerLakesSystem Class
+# Acts as system's Main Window, contains a menu frame and a main frame
+# Menu Frame sets main frame to either Customer, Slips, Service, or Employee Page
+# Methods: switch_main_frame, activate_menu, disable_menu, set_login_time
+#
 class FingerLakesSystem(tk.Tk):
     menu_frame = None
     main_frame = None
@@ -41,7 +47,10 @@ class FingerLakesSystem(tk.Tk):
     def set_login_time(self, time):
         self.login_time = time
 
-
+#
+# MenuFrame: Frame containing 4 buttons to allow for switching between Pages
+# Methods: activate, disable
+#
 class MenuFrame(tk.Frame):
     slip_button = None
     service_button = None
@@ -85,25 +94,33 @@ class MenuFrame(tk.Frame):
         self.customer_button.configure(state="disabled")
         self.employee_button.configure(state="disabled")
 
-
+#
+# ServicePage Class
+#
 class ServicePage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="This is the service page").pack(side="top", fill="x", pady=10)
 
-
+#
+# SlipPage Class
+#
 class SlipPage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="This is slip page").pack(side="top", fill="x", pady=10)
 
-
+#
+# CostomerPage Class
+#
 class CustomerPage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="This is customer page").pack(side="top", fill="x", pady=10)
 
-
+#
+# LoginePage Class
+#
 class LoginPage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
@@ -125,7 +142,9 @@ class LoginPage(tk.Frame):
         master.switch_main_frame(EmployeePage)
         master.activate_menu()
 
-
+#
+# AdminPanel Class
+#
 class AdminPanel(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
@@ -144,7 +163,9 @@ class AdminPanel(tk.Frame):
     def search(self):
         return
 
-
+#
+# CurUserPanel Class
+#
 class CurUserPanel(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
@@ -159,7 +180,9 @@ class CurUserPanel(tk.Frame):
                                                                                               sticky='w')
         tk.Label(self, text="").grid(row=11, column=0, sticky="nsew")
 
-
+#
+# EmployeePage Class
+#
 class EmployeePage(tk.Frame):
     admin_bg_color = "#ff794d"
     cur_admin_frame = None
