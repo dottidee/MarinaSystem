@@ -157,7 +157,7 @@ class LoginPage(tk.Frame):
         tk.Frame.__init__(self, master)
         master.disable_menu()
         tk.Label(self, text=" " * 20 + "\n\n").grid(row=0, column=0)
-        tk.Label(self, text="\n*** Must be logged in to use the system ***\n", fg='#cc3300').grid(row=1, column=1,
+        tk.Label(self, text="\n*** Must be logged in to use the system ***\n", fg="black").grid(row=1, column=1,
                                                                                                   columnspan=3, padx=10,
                                                                                                   sticky='nsew')
         tk.Label(self, text="Employee ID:").grid(row=2, column=1, padx=10, sticky='nsw')
@@ -211,36 +211,37 @@ class AdminPanel(tk.Frame):
     def __init__(self, master, db):
         tk.Frame.__init__(self, master)
         self.configure(bg=master.admin_bg_color)
-        tk.Label(self, text="\nADMINISTRATOR TOOLS:\n", fg="white", bg=master.admin_bg_color).grid(row=0, column=1)
+        tk.Label(self, text="\nADMINISTRATOR TOOLS\n\n", fg="white", bg=master.admin_bg_color).grid(row=0, column=1, columnspan=10)
         # Spacers
         tk.Label(self, text="   ", bg=master.admin_bg_color).grid(row=0, column=25)
-        tk.Label(self, text="   " * 8, bg=master.admin_bg_color).grid(row=0, column=3)
+        tk.Label(self, text="   " * 8, bg=master.admin_bg_color).grid(row=1, column=3)
         tk.Label(self, text="\n", bg=master.admin_bg_color).grid(row=50, column=0)
         # Add Employee Section
-        tk.Label(self, text="* Add Employee *", fg=master.admin_bg_color, bg="white").grid(row=1, column=1)
-        tk.Label(self, text="First Name:", fg="white", bg=master.admin_bg_color).grid(row=2, column=1)
-        self.f_name = tk.Entry(self)
-        self.f_name.grid(row=2, column=2, pady=2, sticky="w")
-        tk.Label(self, text="Last Name:", fg="white", bg=master.admin_bg_color).grid(row=3, column=1)
-        self.l_name = tk.Entry(self)
-        self.l_name.grid(row=3, column=2, pady=2, sticky="w")
+        tk.Label(self, text="* Add Employee *", fg=master.admin_bg_color, bg="white").grid(row=1, column=2, sticky="nw")
         is_admin = tk.IntVar()
-        admin_check = tk.Checkbutton(self, text="Administrator", variable=is_admin, onvalue=1, offvalue=2, fg="white",
+        tk.Label(self, text="\nAdministrator:", fg="white", bg=master.admin_bg_color).grid(row=2, column=1, sticky="se")
+        admin_check = tk.Checkbutton(self, text="", variable=is_admin, onvalue=1, offvalue=2, fg="white",
                                      bg=master.admin_bg_color)
-        admin_check.grid(row=4, column=2, sticky="w")
-        tk.Button(self, text="Add Employee", padx=4, pady=4,
+        admin_check.grid(row=2, column=2, sticky="sw")
+        tk.Label(self, text="First Name:", fg="white", bg=master.admin_bg_color).grid(row=3, column=1, sticky="se")
+        self.f_name = tk.Entry(self)
+        self.f_name.grid(row=3, column=2, pady=2, sticky="se")
+        tk.Label(self, text="Last Name:", fg="white", bg=master.admin_bg_color).grid(row=4, column=1, sticky="se")
+        self.l_name = tk.Entry(self)
+        self.l_name.grid(row=4, column=2, pady=2, sticky="se")
+        tk.Button(self, text="Add", padx=10, pady=4,
                   command=lambda: self.add_employee(db, self.f_name.get(), self.l_name.get(), is_admin.get())).grid(
             row=5,
-            column=1)
+            column=2, sticky="se")
         # Remove Employee Section
-        tk.Label(self, text="* Remove Employee *", fg=master.admin_bg_color, bg="white").grid(row=1, column=4)
-        tk.Label(self, text="Employee ID:", fg="white", bg=master.admin_bg_color).grid(row=2, column=4)
+        tk.Label(self, text="* Remove Employee *", fg=master.admin_bg_color, bg="white").grid(row=1, column=4, columnspan=2, sticky="n")
+        tk.Label(self, text="Employee ID:", fg="white", bg=master.admin_bg_color).grid(row=2, column=4, sticky="ws")
         self.remove_id = tk.Entry(self)
         self.remove_id.grid(row=3, column=4, pady=2, sticky="w")
         tk.Button(self, text="Remove Employee", padx=4, pady=4,
                   command=lambda: self.remove_employee(db, self.remove_id.get())).grid(
             row=3,
-            column=5, sticky="w")
+            column=5, sticky="w", padx=(10, 0))
 
     def add_employee(self, db, f, l, admin):
         if f is not "" and l is not "":
