@@ -72,9 +72,6 @@ class FingerLakesSystem(tk.Tk):
     def set_login_time(self, time):
         self.login_time = time
 
-    def get_database(self):
-        return self.database
-
 
 #
 # MenuFrame: Frame containing 4 buttons to allow for switching between Pages
@@ -209,16 +206,18 @@ class LoginPage(tk.Frame):
 class AdminPanel(tk.Frame):
     f_name = None
     l_name = None
+    remove_id = None
 
     def __init__(self, master, db):
         tk.Frame.__init__(self, master)
         self.configure(bg=master.admin_bg_color)
-        tk.Label(self, text="\nADMINISTRATOR:\n", fg="white", bg=master.admin_bg_color).grid(row=0, column=1)
+        tk.Label(self, text="\nADMINISTRATOR TOOLS:\n", fg="white", bg=master.admin_bg_color).grid(row=0, column=1)
         # Spacers
         tk.Label(self, text="   ", bg=master.admin_bg_color).grid(row=0, column=25)
+        tk.Label(self, text="   " * 8, bg=master.admin_bg_color).grid(row=0, column=3)
         tk.Label(self, text="\n", bg=master.admin_bg_color).grid(row=50, column=0)
         # Add Employee Section
-        tk.Label(self, text="* Add Employee *", fg="white", bg=master.admin_bg_color).grid(row=1, column=1)
+        tk.Label(self, text="* Add Employee *", fg=master.admin_bg_color, bg="white").grid(row=1, column=1)
         tk.Label(self, text="First Name:", fg="white", bg=master.admin_bg_color).grid(row=2, column=1)
         self.f_name = tk.Entry(self)
         self.f_name.grid(row=2, column=2, pady=2, sticky="w")
@@ -230,8 +229,18 @@ class AdminPanel(tk.Frame):
                                      bg=master.admin_bg_color)
         admin_check.grid(row=4, column=2, sticky="w")
         tk.Button(self, text="Add Employee", padx=4, pady=4,
-                  command=lambda: self.add_employee(db, self.f_name.get(), self.l_name.get(), is_admin.get())).grid(row=5,
-                                                                                                              column=1)
+                  command=lambda: self.add_employee(db, self.f_name.get(), self.l_name.get(), is_admin.get())).grid(
+            row=5,
+            column=1)
+        # Remove Employee Section
+        tk.Label(self, text="* Remove Employee *", fg=master.admin_bg_color, bg="white").grid(row=1, column=4)
+        tk.Label(self, text="Employee ID:", fg="white", bg=master.admin_bg_color).grid(row=2, column=4)
+        self.remove_id = tk.Entry(self)
+        self.remove_id.grid(row=3, column=4, pady=2, sticky="w")
+        tk.Button(self, text="Remove Employee", padx=4, pady=4,
+                  command=lambda: self.remove_employee(db, self.remove_id.get())).grid(
+            row=3,
+            column=5, sticky="w")
 
     def add_employee(self, db, f, l, admin):
         if f is not "" and l is not "":
@@ -252,6 +261,33 @@ class AdminPanel(tk.Frame):
             self.l_name.delete(0, 'end')
         else:
             messagebox.showerror("Administrator Error", "Employee must have a first and last name.")
+
+    def remove_employee(self, db, id):
+        sql = "SELECT * FROM employee WHERE employee_id = %s"
+        usr_entry = (id,)
+        cursor = db.cursor()
+        cursor.execute(sql, usr_entry)
+        result = cursor.fetchall()
+        cursor.close()
+        # check if user entry is a valid ID from employee table
+        if result.__len__() != 0:
+            # valid ID confirm removal
+            employee_info = "Employee ID: " + str(result[0][0]) + "\nFirst Name: " + result[0][1] + "\nLast Name: " + \
+                            result[0][2]
+            msg_box = tk.messagebox.askquestion('Confirm Removal',
+                                                employee_info + "\n\nAre you sure you want to remove this employee?",
+                                                icon='warning')
+            if msg_box == 'yes':
+                sql2 = "DELETE FROM employee WHERE employee_id = %s"
+                usr_entry = (id,)
+                cursor = db.cursor()
+                cursor.execute(sql2, usr_entry)
+                db.commit()
+            self.remove_id.delete(0, 'end')
+        else:
+            messagebox.showerror("Administrator Error", "Invalid ID")
+            self.remove_id.delete(0, 'end')
+        cursor.close()
 
 
 #
