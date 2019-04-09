@@ -72,6 +72,9 @@ class FingerLakesSystem(tk.Tk):
     def set_login_time(self, time):
         self.login_time = time
 
+    def get_database(self):
+        return self.database
+
 
 #
 # MenuFrame: Frame containing 4 buttons to allow for switching between Pages
@@ -84,7 +87,7 @@ class MenuFrame(tk.Frame):
     employee_button = None
 
     def __init__(self, master):
-        x_pad = 50
+        x_pad = 70
         y_pad = 20
 
         tk.Frame.__init__(self, master)
@@ -101,6 +104,7 @@ class MenuFrame(tk.Frame):
         self.service_button.grid(row=0, column=2)
         self.customer_button.grid(row=0, column=3)
         self.employee_button.grid(row=0, column=4)
+
         self.activate()
 
     def activate(self):
@@ -196,28 +200,58 @@ class LoginPage(tk.Frame):
             messagebox.showerror("Login Error", "Invalid User ID\nPlease try again")
             master.switch_main_frame(LoginPage)
             master.disable_menu()
+        cursor.close()
 
 
 #
 # AdminPanel Class
 #
 class AdminPanel(tk.Frame):
-    def __init__(self, master):
+    f_name = None
+    l_name = None
+
+    def __init__(self, master, db):
         tk.Frame.__init__(self, master)
         self.configure(bg=master.admin_bg_color)
         tk.Label(self, text="\nADMINISTRATOR:\n", fg="white", bg=master.admin_bg_color).grid(row=0, column=1)
-        tk.Label(self, text="", bg=master.admin_bg_color).grid(row=0, column=0)
+        # Spacers
         tk.Label(self, text="   ", bg=master.admin_bg_color).grid(row=0, column=25)
-        tk.Label(self, text="\n", bg=master.admin_bg_color).grid(row=2, column=0)
+        tk.Label(self, text="\n", bg=master.admin_bg_color).grid(row=50, column=0)
+        # Add Employee Section
+        tk.Label(self, text="* Add Employee *", fg="white", bg=master.admin_bg_color).grid(row=1, column=1)
+        tk.Label(self, text="First Name:", fg="white", bg=master.admin_bg_color).grid(row=2, column=1)
+        self.f_name = tk.Entry(self)
+        self.f_name.grid(row=2, column=2, pady=2, sticky="w")
+        tk.Label(self, text="Last Name:", fg="white", bg=master.admin_bg_color).grid(row=3, column=1)
+        self.l_name = tk.Entry(self)
+        self.l_name.grid(row=3, column=2, pady=2, sticky="w")
+        is_admin = tk.IntVar()
+        admin_check = tk.Checkbutton(self, text="Administrator", variable=is_admin, onvalue=1, offvalue=2, fg="white",
+                                     bg=master.admin_bg_color)
+        admin_check.grid(row=4, column=2, sticky="w")
         tk.Button(self, text="Add Employee", padx=4, pady=4,
-                  command=lambda: master.add_employee()).grid(row=1, column=1)
-        tk.Button(self, text="View All Employees", padx=4, pady=4).grid(row=1, column=2)
-        tk.Label(self, text="", bg=master.admin_bg_color).grid(row=1, column=3)
-        tk.Entry(self).grid(row=1, column=4, pady=2)
-        tk.Button(self, text="Search Employees", padx=4, pady=4, command=self.search()).grid(row=1, column=5)
+                  command=lambda: self.add_employee(db, self.f_name.get(), self.l_name.get(), is_admin.get())).grid(row=5,
+                                                                                                              column=1)
 
-    def search(self):
-        return
+    def add_employee(self, db, f, l, admin):
+        if f is not "" and l is not "":
+            cursor = db.cursor()
+            add_employee = ("INSERT INTO employee "
+                            "(first_name, last_name, manager_id) "
+                            "VALUES (%s, %s, %s)")
+            data_employee = (f, l, admin)
+            # Insert new employee
+            cursor.execute(add_employee, data_employee)
+            emp_no = cursor.lastrowid
+            # Make sure data is committed to the database
+            db.commit()
+            cursor.close()
+            employee_info = "Employee ID: " + str(emp_no) + "\nFirst Name: " + f + "\nLast Name: " + l
+            messagebox.showinfo("New Employee Added", employee_info)
+            self.f_name.delete(0, 'end')
+            self.l_name.delete(0, 'end')
+        else:
+            messagebox.showerror("Administrator Error", "Employee must have a first and last name.")
 
 
 #
@@ -253,7 +287,7 @@ class EmployeePage(tk.Frame):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="   ").grid(row=0, column=0, sticky="nsew")
         self.update_cur_usr_panel()
-        self.update_admin_panel()
+        self.update_admin_panel(master)
 
     def update_cur_usr_panel(self):
         new_frame = CurUserPanel(self)
@@ -262,19 +296,16 @@ class EmployeePage(tk.Frame):
         self.cur_usr_frame = new_frame
         self.cur_usr_frame.grid(row=0, column=1, sticky="nsew")
 
-    def update_admin_panel(self):
+    def update_admin_panel(self, master):
         admin_start_row = 2
         admin_start_col = 1
         """Destroys current admin frame and replaces it with a new one if privilege = 1."""
-        new_frame = AdminPanel(self)
         if self.cur_admin_frame is not None:
             self.cur_admin_frame.destroy()
         if FingerLakesSystem.privilege == 1:
+            new_frame = AdminPanel(self, master.database)
             self.cur_admin_frame = new_frame
             self.cur_admin_frame.grid(row=admin_start_row, column=admin_start_col, sticky="nsew")
-
-    def add_employee(self):
-        return
 
     def logout(self):
         self.master.switch_main_frame(LoginPage)
@@ -289,4 +320,7 @@ class EmployeePage(tk.Frame):
 
 if __name__ == "__main__":
     app = FingerLakesSystem()
+    # Default window will fill screen
+    w, h = app.winfo_screenwidth(), app.winfo_screenheight()
+    app.geometry("%dx%d+0+0" % (w, h))
     app.mainloop()
