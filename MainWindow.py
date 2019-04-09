@@ -156,7 +156,7 @@ class LoginPage(tk.Frame):
         tk.Frame.__init__(self, master)
         master.disable_menu()
         tk.Label(self, text=" " * 20 + "\n\n").grid(row=0, column=0)
-        tk.Label(self, text="\n*** Must be logged in to use the system ***\n", fg='#ff0000').grid(row=1, column=1,
+        tk.Label(self, text="\n*** Must be logged in to use the system ***\n", fg='#cc3300').grid(row=1, column=1,
                                                                                                   columnspan=3, padx=10,
                                                                                                   sticky='nsew')
         tk.Label(self, text="Employee ID:").grid(row=2, column=1, padx=10, sticky='nsw')
@@ -205,7 +205,7 @@ class AdminPanel(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         self.configure(bg=master.admin_bg_color)
-        tk.Label(self, text="\nADMINISTRATOR:\n", bg=master.admin_bg_color).grid(row=0, column=1)
+        tk.Label(self, text="\nADMINISTRATOR:\n", fg="white", bg=master.admin_bg_color).grid(row=0, column=1)
         tk.Label(self, text="", bg=master.admin_bg_color).grid(row=0, column=0)
         tk.Label(self, text="   ", bg=master.admin_bg_color).grid(row=0, column=25)
         tk.Label(self, text="\n", bg=master.admin_bg_color).grid(row=2, column=0)
@@ -231,7 +231,7 @@ class CurUserPanel(tk.Frame):
         tk.Label(self, text=master.get_user()).grid(row=1, column=1, sticky="nsw")
         tk.Label(self, text="Employee Type: ").grid(row=2, column=0, sticky="nsw")
         if FingerLakesSystem.privilege == 1:
-            tk.Label(self, text="Administrator", fg="#ff794d").grid(row=2, column=1, sticky="nsw")
+            tk.Label(self, text="Administrator", fg="#cc3300").grid(row=2, column=1, sticky="nsw")
         else:
             tk.Label(self, text="Regular", fg="black").grid(row=2, column=1, sticky="nsw")
         tk.Label(self, text="Login Time: ").grid(row=3, column=0, sticky="nsw")
@@ -245,7 +245,7 @@ class CurUserPanel(tk.Frame):
 # EmployeePage Class
 #
 class EmployeePage(tk.Frame):
-    admin_bg_color = "#ff794d"
+    admin_bg_color = "#cc3300"
     cur_admin_frame = None
     cur_usr_frame = None
 
