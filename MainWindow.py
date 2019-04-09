@@ -1,6 +1,9 @@
 import tkinter as tk
 import datetime
+from tkinter import messagebox
 import mysql.connector
+from mysql.connector import errorcode
+
 
 #
 # FingerLakesSystem Class
@@ -9,9 +12,10 @@ import mysql.connector
 # Methods: switch_main_frame, activate_menu, disable_menu, set_login_time
 #
 class FingerLakesSystem(tk.Tk):
+    database = None
     menu_frame = None
     main_frame = None
-    privilege = 1
+    privilege = None  # 1=ADMIN, 2=Regular
     login_time = ""
     user = ""
 
@@ -24,10 +28,31 @@ class FingerLakesSystem(tk.Tk):
         self.minsize(width=682, height=666)
         # add menu bar to top
         self.menu_frame = MenuFrame(self)
-        self.menu_frame.grid(row=0, column=0, sticky="nsew")
+        self.menu_frame.pack()
+        # connect to database
+        self.connect_database()
         # load login page
         self.switch_main_frame(LoginPage)
         self.disable_menu()
+
+    def connect_database(self):
+        # Connect to remote database
+        try:
+            self.database = mysql.connector.connect(
+                host="remotemysql.com",
+                user="3rybg59bIE",
+                password="Rb8WxAwcfD",
+                database="3rybg59bIE"
+            )
+        # Catch all errors
+        except mysql.connector.Error as err:
+            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                messagebox.showerror("Database Error", "Invalid user name or password")
+            elif err.errno == errorcode.ER_BAD_DB_ERROR:
+                messagebox.showerror("Database Error", "Database does not exist")
+            else:
+                messagebox.showerror("Database Error", err)
+            self.destroy()
 
     def switch_main_frame(self, frame_class):
         """Destroys current frame and replaces it with a new one."""
@@ -35,7 +60,7 @@ class FingerLakesSystem(tk.Tk):
         if self.main_frame is not None:
             self.main_frame.destroy()
         self.main_frame = new_frame
-        self.main_frame.grid(row=1, column=0, sticky="nsew")
+        self.main_frame.pack()
         self.activate_menu()
 
     def activate_menu(self):
@@ -46,6 +71,7 @@ class FingerLakesSystem(tk.Tk):
 
     def set_login_time(self, time):
         self.login_time = time
+
 
 #
 # MenuFrame: Frame containing 4 buttons to allow for switching between Pages
@@ -94,6 +120,7 @@ class MenuFrame(tk.Frame):
         self.customer_button.configure(state="disabled")
         self.employee_button.configure(state="disabled")
 
+
 #
 # ServicePage Class
 #
@@ -101,6 +128,7 @@ class ServicePage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="This is the service page").pack(side="top", fill="x", pady=10)
+
 
 #
 # SlipPage Class
@@ -110,6 +138,7 @@ class SlipPage(tk.Frame):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="This is slip page").pack(side="top", fill="x", pady=10)
 
+
 #
 # CostomerPage Class
 #
@@ -118,14 +147,15 @@ class CustomerPage(tk.Frame):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="This is customer page").pack(side="top", fill="x", pady=10)
 
+
 #
-# LoginePage Class
+# LoginPage Class
 #
 class LoginPage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         master.disable_menu()
-        tk.Label(self, text=" " * 30 + "\n\n").grid(row=0, column=0)
+        tk.Label(self, text=" " * 20 + "\n\n").grid(row=0, column=0)
         tk.Label(self, text="\n*** Must be logged in to use the system ***\n", fg='#ff0000').grid(row=1, column=1,
                                                                                                   columnspan=3, padx=10,
                                                                                                   sticky='nsew')
@@ -136,11 +166,37 @@ class LoginPage(tk.Frame):
                                                                                                                  column=3)
 
     def login(self, master, entry):
-        master.user = entry
-        now = datetime.datetime.now()
-        master.set_login_time(now.strftime("%Y-%m-%d %H:%M"))
-        master.switch_main_frame(EmployeePage)
-        master.activate_menu()
+        # search employee table for id that matches entry
+        sql = "SELECT * FROM employee WHERE employee_id = %s"
+        usr_entry = (entry,)
+        cursor = master.database.cursor()
+        cursor.execute(sql, usr_entry)
+        result = cursor.fetchall()
+        # check if user entry is a valid ID from employee table
+        if result.__len__() != 0:
+            # valid user id: set user_id
+            master.user_id = entry
+            # Set user
+            master.user = ""
+            if isinstance(result[0][2], str):  # check if user has a last name
+                master.user += result[0][2] + ", "
+            if isinstance(result[0][1], str):  # check if user has a first name
+                master.user += result[0][1]
+            # Set privilege
+            if result[0][4] == 1:
+                FingerLakesSystem.privilege = 1
+            else:
+                FingerLakesSystem.privilege = 2
+            now = datetime.datetime.now()
+            master.set_login_time(now.strftime("%Y-%m-%d %H:%M"))
+            master.switch_main_frame(EmployeePage)
+            master.activate_menu()
+        else:
+            # invalid user id: show error and return to login page
+            messagebox.showerror("Login Error", "Invalid User ID\nPlease try again")
+            master.switch_main_frame(LoginPage)
+            master.disable_menu()
+
 
 #
 # AdminPanel Class
@@ -163,6 +219,7 @@ class AdminPanel(tk.Frame):
     def search(self):
         return
 
+
 #
 # CurUserPanel Class
 #
@@ -173,12 +230,16 @@ class CurUserPanel(tk.Frame):
         tk.Label(self, text="User: ").grid(row=1, column=0, sticky="nsw")
         tk.Label(self, text=master.get_user()).grid(row=1, column=1, sticky="nsw")
         tk.Label(self, text="Employee Type: ").grid(row=2, column=0, sticky="nsw")
-        tk.Label(self, text="Administrator", fg="#ff794d").grid(row=2, column=1, sticky="nsw")
+        if FingerLakesSystem.privilege == 1:
+            tk.Label(self, text="Administrator", fg="#ff794d").grid(row=2, column=1, sticky="nsw")
+        else:
+            tk.Label(self, text="Regular", fg="black").grid(row=2, column=1, sticky="nsw")
         tk.Label(self, text="Login Time: ").grid(row=3, column=0, sticky="nsw")
         tk.Label(self, text=master.get_login_time()).grid(row=3, column=1, sticky="nsw")
         tk.Button(self, text="Logout", command=lambda: master.logout(), padx=10, pady=4).grid(row=10, column=1,
                                                                                               sticky='w')
         tk.Label(self, text="").grid(row=11, column=0, sticky="nsew")
+
 
 #
 # EmployeePage Class
