@@ -334,32 +334,42 @@ class CurUserPanel(tk.Frame):
 
         # Employee Search
         tk.Label(self, text="{:^60s}".format("Lookup Employee"), fg="black", bg="white", borderwidth=2,
-                 relief="sunken").grid(row=5, column=0, columnspan=2, sticky="ne")
+                 relief="sunken").grid(row=5, column=0, columnspan=3, sticky="ne")
         # first name
         tk.Label(self, text="First Name:").grid(row=6, column=0, sticky="se")
         self.f_name = tk.Entry(self)
-        self.f_name.grid(row=6, column=1, pady=5, sticky="se")
+        self.f_name.grid(row=6, column=1, columnspan=2, pady=5, sticky="se")
         # last name
         tk.Label(self, text="Last Name:").grid(row=7, column=0, sticky="se")
         self.l_name = tk.Entry(self)
-        self.l_name.grid(row=7, column=1, pady=5, sticky="se")
+        self.l_name.grid(row=7, column=1, columnspan=2, pady=5, sticky="se")
         # id
         tk.Label(self, text="Employee ID:").grid(row=8, column=0, sticky="se")
         self.id = tk.Entry(self)
-        self.id.grid(row=8, column=1, pady=5, sticky="se")
-        # add button
-        tk.Button(self, text="Search", padx=60,
+        self.id.grid(row=8, column=1, columnspan=2, pady=5, sticky="se")
+        # search button
+        tk.Button(self, text="Search", padx=30,
                   command=lambda: self.update_search_panel(db, self.f_name.get(), self.l_name.get(),
                                                            self.id.get())).grid(
             row=9,
-            column=1, pady=5, sticky="s")
+            column=2, pady=5, sticky="s")
+        # clear button
+        tk.Button(self, text="Clear", padx=10,
+                  command=lambda: self.clear()).grid(
+            row=9,
+            column=1, pady=5, padx=5, sticky="se")
 
     def update_search_panel(self, db, f, l, id):
         new_frame = EmployeeSearchPanel(self, db, f, l, id)
         if self.cur_search_frame is not None:
             self.cur_search_frame.destroy()
         self.cur_search_frame = new_frame
-        self.cur_search_frame.grid(row=1, column=2, rowspan=8, sticky="", padx=20)
+        self.cur_search_frame.grid(row=1, column=3, rowspan=8, sticky="", padx=20)
+
+    def clear(self):
+        self.f_name.delete(0, 'end')
+        self.l_name.delete(0, 'end')
+        self.id.delete(0, 'end')
 
 
 #
@@ -377,7 +387,7 @@ class EmployeeSearchPanel(tk.Frame):
         tk.Frame.__init__(self, master)
         self.configure(bg="gray")
         self.s = tk.Scrollbar(self)
-        self.t = tk.Text(self, height=20, width=70, relief="sunken", bg="#e6e6e6")
+        self.t = tk.Text(self, height=20, width=60, relief="sunken", bg="#e6e6e6")
         self.s.pack(side='right', fill='y')
         self.t.pack(side='left', fill='y')
         self.s.config(command=self.t.yview)
@@ -402,7 +412,7 @@ class EmployeeSearchPanel(tk.Frame):
             cursor.execute(sql, usr_entry)
             self.result = cursor.fetchall()
         cursor.close()
-        s = tabulate(self.result, headers=["ID", "First Name", "Last Name", "", ""], tablefmt="grid")
+        s = tabulate(self.result, headers=["ID", "First Name", "Last Name", "Email", "Type"], tablefmt="fancy_grid")
         return s
 
 
