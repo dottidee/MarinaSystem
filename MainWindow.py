@@ -3,6 +3,7 @@ import datetime
 from tkinter import messagebox
 import mysql.connector
 from mysql.connector import errorcode
+from tabulate import tabulate
 
 
 #
@@ -158,8 +159,8 @@ class LoginPage(tk.Frame):
         master.disable_menu()
         tk.Label(self, text=" " * 20 + "\n\n").grid(row=0, column=0)
         tk.Label(self, text="\n*** Must be logged in to use the system ***\n", fg="black").grid(row=1, column=1,
-                                                                                                  columnspan=3, padx=10,
-                                                                                                  sticky='nsew')
+                                                                                                columnspan=3, padx=10,
+                                                                                                sticky='nsew')
         tk.Label(self, text="Employee ID:").grid(row=2, column=1, padx=10, sticky='nsw')
         self.entry = tk.Entry(self)
         self.entry.grid(row=2, column=2, pady=2, sticky='nsw')
@@ -211,34 +212,48 @@ class AdminPanel(tk.Frame):
     def __init__(self, master, db):
         tk.Frame.__init__(self, master)
         self.configure(bg=master.admin_bg_color)
-        tk.Label(self, text="\nADMINISTRATOR TOOLS\n\n", fg="white", bg=master.admin_bg_color).grid(row=0, column=1, columnspan=10)
+        tk.Label(self, text="\nADMINISTRATOR TOOLS\n\n", fg="white", bg=master.admin_bg_color).grid(row=0, column=1,
+                                                                                                    columnspan=10)
+
         # Spacers
         tk.Label(self, text="   ", bg=master.admin_bg_color).grid(row=0, column=25)
         tk.Label(self, text="   " * 8, bg=master.admin_bg_color).grid(row=1, column=3)
-        tk.Label(self, text="\n", bg=master.admin_bg_color).grid(row=50, column=0)
+        tk.Label(self, text="\n    ", bg=master.admin_bg_color).grid(row=50, column=0)
+
         # Add Employee Section
-        tk.Label(self, text="* Add Employee *", fg=master.admin_bg_color, bg="white").grid(row=1, column=2, sticky="nw")
+        tk.Label(self, text="{:^60s}".format(" Add Employee "), fg="black", bg="white", borderwidth=2,
+                 relief="sunken").grid(row=1, column=1, columnspan=2, sticky="n")
         is_admin = tk.IntVar()
-        tk.Label(self, text="\nAdministrator:", fg="white", bg=master.admin_bg_color).grid(row=2, column=1, sticky="se")
+        # Administrator
+        tk.Label(self, text="\nAdmin:", fg="white", bg=master.admin_bg_color).grid(row=2, column=1, sticky="se")
         admin_check = tk.Checkbutton(self, text="", variable=is_admin, onvalue=1, offvalue=2, fg="white",
                                      bg=master.admin_bg_color)
         admin_check.grid(row=2, column=2, sticky="sw")
+        # first name
         tk.Label(self, text="First Name:", fg="white", bg=master.admin_bg_color).grid(row=3, column=1, sticky="se")
         self.f_name = tk.Entry(self)
-        self.f_name.grid(row=3, column=2, pady=2, sticky="se")
+        self.f_name.grid(row=3, column=2, pady=5, sticky="se")
+        # last name
         tk.Label(self, text="Last Name:", fg="white", bg=master.admin_bg_color).grid(row=4, column=1, sticky="se")
         self.l_name = tk.Entry(self)
-        self.l_name.grid(row=4, column=2, pady=2, sticky="se")
-        tk.Button(self, text="Add", padx=10, pady=4,
+        self.l_name.grid(row=4, column=2, pady=5, sticky="se")
+        # add button
+        tk.Button(self, text="Add", padx=80,
                   command=lambda: self.add_employee(db, self.f_name.get(), self.l_name.get(), is_admin.get())).grid(
             row=5,
-            column=2, sticky="se")
+            column=2, pady=5, sticky="se")
+
         # Remove Employee Section
-        tk.Label(self, text="* Remove Employee *", fg=master.admin_bg_color, bg="white").grid(row=1, column=4, columnspan=2, sticky="n")
+        tk.Label(self, text="{:^70s}".format(" Remove Employee "), fg="black", bg="white",
+                 borderwidth=2,
+                 relief="sunken").grid(row=1,
+                                       column=4,
+                                       columnspan=2,
+                                       sticky="n")
         tk.Label(self, text="Employee ID:", fg="white", bg=master.admin_bg_color).grid(row=2, column=4, sticky="ws")
         self.remove_id = tk.Entry(self)
         self.remove_id.grid(row=3, column=4, pady=2, sticky="w")
-        tk.Button(self, text="Remove Employee", padx=4, pady=4,
+        tk.Button(self, text="Remove", padx=40, pady=4,
                   command=lambda: self.remove_employee(db, self.remove_id.get())).grid(
             row=3,
             column=5, sticky="w", padx=(10, 0))
@@ -295,7 +310,12 @@ class AdminPanel(tk.Frame):
 # CurUserPanel Class
 #
 class CurUserPanel(tk.Frame):
-    def __init__(self, master):
+    f_name = None
+    l_name = None
+    id = None
+    cur_search_frame = None
+
+    def __init__(self, master, db):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="").grid(row=0, column=1, sticky="nsew")
         tk.Label(self, text="User: ").grid(row=1, column=0, sticky="nsw")
@@ -307,9 +327,83 @@ class CurUserPanel(tk.Frame):
             tk.Label(self, text="Regular", fg="black").grid(row=2, column=1, sticky="nsw")
         tk.Label(self, text="Login Time: ").grid(row=3, column=0, sticky="nsw")
         tk.Label(self, text=master.get_login_time()).grid(row=3, column=1, sticky="nsw")
-        tk.Button(self, text="Logout", command=lambda: master.logout(), padx=10, pady=4).grid(row=10, column=1,
-                                                                                              sticky='w')
+        tk.Button(self, text="Logout", command=lambda: master.logout(), padx=10, pady=4).grid(row=4, column=1,
+                                                                                              sticky='nw')
+        tk.Label(self, text="\n\n").grid(row=4, column=0, sticky="ns")
         tk.Label(self, text="").grid(row=11, column=0, sticky="nsew")
+
+        # Employee Search
+        tk.Label(self, text="{:^60s}".format("Lookup Employee"), fg="black", bg="white", borderwidth=2,
+                 relief="sunken").grid(row=5, column=0, columnspan=2, sticky="ne")
+        # first name
+        tk.Label(self, text="First Name:").grid(row=6, column=0, sticky="se")
+        self.f_name = tk.Entry(self)
+        self.f_name.grid(row=6, column=1, pady=5, sticky="se")
+        # last name
+        tk.Label(self, text="Last Name:").grid(row=7, column=0, sticky="se")
+        self.l_name = tk.Entry(self)
+        self.l_name.grid(row=7, column=1, pady=5, sticky="se")
+        # id
+        tk.Label(self, text="Employee ID:").grid(row=8, column=0, sticky="se")
+        self.id = tk.Entry(self)
+        self.id.grid(row=8, column=1, pady=5, sticky="se")
+        # add button
+        tk.Button(self, text="Search", padx=60,
+                  command=lambda: self.update_search_panel(db, self.f_name.get(), self.l_name.get(),
+                                                           self.id.get())).grid(
+            row=9,
+            column=1, pady=5, sticky="s")
+
+    def update_search_panel(self, db, f, l, id):
+        new_frame = EmployeeSearchPanel(self, db, f, l, id)
+        if self.cur_search_frame is not None:
+            self.cur_search_frame.destroy()
+        self.cur_search_frame = new_frame
+        self.cur_search_frame.grid(row=1, column=2, rowspan=8, sticky="", padx=20)
+
+
+#
+# EmployeeSearchPanel Class
+#
+class EmployeeSearchPanel(tk.Frame):
+    f_name = None
+    l_name = None
+    remove_id = None
+    s = None
+    t = None
+    result = None
+
+    def __init__(self, master, db, f, l, id):
+        tk.Frame.__init__(self, master)
+        self.configure(bg="gray")
+        self.s = tk.Scrollbar(self)
+        self.t = tk.Text(self, height=20, width=70, relief="sunken", bg="#e6e6e6")
+        self.s.pack(side='right', fill='y')
+        self.t.pack(side='left', fill='y')
+        self.s.config(command=self.t.yview)
+        self.t.config(yscrollcommand=self.s.set)
+        # search database insert string into scrollbar
+        self.t.insert(tk.END, self.search(db, f, l, id))
+        self.t.configure(state='disabled')
+
+    # return string of search results
+    def search(self, db, f, l, i):
+        if i is not "":
+            sql = "SELECT * FROM employee WHERE employee_id = %s"
+            usr_entry = (i,)
+            cursor = db.cursor()
+            cursor.execute(sql, usr_entry)
+            self.result = cursor.fetchall()
+            cursor.close()
+        else:
+            sql = "SELECT * FROM employee WHERE first_name LIKE %s AND last_name LIKE %s ORDER BY last_name ASC"
+            usr_entry = (f + "%", l + "%")
+            cursor = db.cursor()
+            cursor.execute(sql, usr_entry)
+            self.result = cursor.fetchall()
+        cursor.close()
+        s = tabulate(self.result, headers=["ID", "First Name", "Last Name", "", ""], tablefmt="grid")
+        return s
 
 
 #
@@ -323,15 +417,15 @@ class EmployeePage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="   ").grid(row=0, column=0, sticky="nsew")
-        self.update_cur_usr_panel()
+        self.update_cur_usr_panel(master)
         self.update_admin_panel(master)
 
-    def update_cur_usr_panel(self):
-        new_frame = CurUserPanel(self)
+    def update_cur_usr_panel(self, master):
+        new_frame = CurUserPanel(self, master.database)
         if self.cur_usr_frame is not None:
             self.cur_usr_frame.destroy()
         self.cur_usr_frame = new_frame
-        self.cur_usr_frame.grid(row=0, column=1, sticky="nsew")
+        self.cur_usr_frame.grid(row=0, column=1, sticky="w")
 
     def update_admin_panel(self, master):
         admin_start_row = 2
