@@ -6,7 +6,6 @@ from mysql.connector import errorcode
 from tabulate import tabulate
 
 
-#
 # FingerLakesSystem Class
 # Acts as system's Main Window, contains a menu frame and a main frame
 # Menu Frame sets main frame to either Customer, Slips, Service, or Employee Page
@@ -207,6 +206,7 @@ class LoginPage(tk.Frame):
 class AdminPanel(tk.Frame):
     f_name = None
     l_name = None
+    email = None
     remove_id = None
 
     def __init__(self, master, db):
@@ -237,10 +237,13 @@ class AdminPanel(tk.Frame):
         tk.Label(self, text="Last Name:", fg="white", bg=master.admin_bg_color).grid(row=4, column=1, sticky="se")
         self.l_name = tk.Entry(self)
         self.l_name.grid(row=4, column=2, pady=5, sticky="se")
+        tk.Label(self, text="Email:", fg="white", bg=master.admin_bg_color).grid(row=5, column=1, sticky="se")
+        self.email = tk.Entry(self)
+        self.email.grid(row=5, column=2, pady=5, sticky="se")
         # add button
         tk.Button(self, text="Add", padx=80,
-                  command=lambda: self.add_employee(db, self.f_name.get(), self.l_name.get(), is_admin.get())).grid(
-            row=5,
+                  command=lambda: self.add_employee(db, self.f_name.get(), self.l_name.get(),self.email.get(), is_admin.get())).grid(
+            row=6,
             column=2, pady=5, sticky="se")
 
         # Remove Employee Section
@@ -258,23 +261,24 @@ class AdminPanel(tk.Frame):
             row=3,
             column=5, sticky="w", padx=(10, 0))
 
-    def add_employee(self, db, f, l, admin):
-        if f is not "" and l is not "":
+    def add_employee(self, db, f, l, e, admin):
+        if f is not "" and l is not "" and e is not "":
             cursor = db.cursor()
             add_employee = ("INSERT INTO employee "
-                            "(first_name, last_name, manager_id) "
-                            "VALUES (%s, %s, %s)")
-            data_employee = (f, l, admin)
+                            "(first_name, last_name, email, manager_id) "
+                            "VALUES (%s, %s, %s, %s)")
+            data_employee = (f, l, e, admin)
             # Insert new employee
             cursor.execute(add_employee, data_employee)
             emp_no = cursor.lastrowid
             # Make sure data is committed to the database
             db.commit()
             cursor.close()
-            employee_info = "Employee ID: " + str(emp_no) + "\nFirst Name: " + f + "\nLast Name: " + l
+            employee_info = "Employee ID: " + str(emp_no) + "\nFirst Name: " + f + "\nLast Name: " + l + "\nEmail: " + e
             messagebox.showinfo("New Employee Added", employee_info)
             self.f_name.delete(0, 'end')
             self.l_name.delete(0, 'end')
+            self.email.delete(0, 'end')
         else:
             messagebox.showerror("Administrator Error", "Employee must have a first and last name.")
 
@@ -387,7 +391,7 @@ class EmployeeSearchPanel(tk.Frame):
         tk.Frame.__init__(self, master)
         self.configure(bg="gray")
         self.s = tk.Scrollbar(self)
-        self.t = tk.Text(self, height=20, width=60, relief="sunken", bg="#e6e6e6")
+        self.t = tk.Text(self, height=20, width=70, relief="sunken", bg="#e6e6e6")
         self.s.pack(side='right', fill='y')
         self.t.pack(side='left', fill='y')
         self.s.config(command=self.t.yview)
