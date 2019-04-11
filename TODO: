@@ -4,3 +4,25 @@ add employee panel:
     use marina id to find employee location
         using the marina id specified in the first 2 digits of the employee id,
         make a call to the db to find the location of that marina
+
+Service Page:
+
+Rentals Page:
+    Search functionality
+    Create new rentals
+    Admin Only:
+        alter or delete rentals
+
+Customer Page:
+    Search customer panel
+        create a search panel for existing customers similar to search employee
+        results should show customer information not current slip rentals
+    Create customer Panel
+        create a new customer panel,
+        should accept inputs for:
+            -first and last name
+            -phone number
+            -address
+    Alter or delete customer panel
+        possibly admin only more likely regular access
+        edit customer information or delete customer data
