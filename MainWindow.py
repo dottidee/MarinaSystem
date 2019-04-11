@@ -292,17 +292,20 @@ class AdminPanel(tk.Frame):
         # check if user entry is a valid ID from employee table
         if result.__len__() != 0:
             # valid ID confirm removal
-            employee_info = "Employee ID: " + str(result[0][0]) + "\nFirst Name: " + result[0][1] + "\nLast Name: " + \
-                            result[0][2]
-            msg_box = tk.messagebox.askquestion('Confirm Removal',
-                                                employee_info + "\n\nAre you sure you want to remove this employee?",
-                                                icon='warning')
-            if msg_box == 'yes':
-                sql2 = "DELETE FROM employee WHERE employee_id = %s"
-                usr_entry = (id,)
-                cursor = db.cursor()
-                cursor.execute(sql2, usr_entry)
-                db.commit()
+            if id is '1':
+                messagebox.showerror("Administrator Error", "Cannot remove user")
+            else:
+                employee_info = "Employee ID: " + str(result[0][0]) + "\nFirst Name: " + result[0][1] + "\nLast Name: " + \
+                                result[0][2]
+                msg_box = tk.messagebox.askquestion('Confirm Removal',
+                                                    employee_info + "\n\nAre you sure you want to remove this employee?",
+                                                    icon='warning')
+                if msg_box == 'yes':
+                    sql2 = "DELETE FROM employee WHERE employee_id = %s"
+                    usr_entry = (id,)
+                    cursor = db.cursor()
+                    cursor.execute(sql2, usr_entry)
+                    db.commit()
             self.remove_id.delete(0, 'end')
         else:
             messagebox.showerror("Administrator Error", "Invalid ID")
