@@ -207,6 +207,7 @@ class AdminPanel(tk.Frame):
     f_name = None
     l_name = None
     email = None
+    empl_id = None
     remove_id = None
 
     def __init__(self, master, db):
@@ -237,13 +238,18 @@ class AdminPanel(tk.Frame):
         tk.Label(self, text="Last Name:", fg="white", bg=master.admin_bg_color).grid(row=4, column=1, sticky="se")
         self.l_name = tk.Entry(self)
         self.l_name.grid(row=4, column=2, pady=5, sticky="se")
+        # email
         tk.Label(self, text="Email:", fg="white", bg=master.admin_bg_color).grid(row=5, column=1, sticky="se")
         self.email = tk.Entry(self)
         self.email.grid(row=5, column=2, pady=5, sticky="se")
+        # employee id
+        tk.Label(self, text="Employee id:", fg="white", bg=master.admin_bg_color).grid(row=6, column=1, sticky="se")
+        self.empl_id = tk.Entry(self)
+        self.empl_id.grid(row=6, column=2, pady=5, sticky="se")
         # add button
         tk.Button(self, text="Add", padx=80,
                   command=lambda: self.add_employee(db, self.f_name.get(), self.l_name.get(),self.email.get(), is_admin.get())).grid(
-            row=6,
+            row=7,
             column=2, pady=5, sticky="se")
 
         # Remove Employee Section
