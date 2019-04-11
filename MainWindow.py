@@ -285,6 +285,7 @@ class AdminPanel(tk.Frame):
             self.f_name.delete(0, 'end')
             self.l_name.delete(0, 'end')
             self.email.delete(0, 'end')
+            self.empl_id.delete(0, 'end')
         else:
             messagebox.showerror("Administrator Error", "Employee must have a first and last name.")
 
@@ -400,7 +401,7 @@ class EmployeeSearchPanel(tk.Frame):
         tk.Frame.__init__(self, master)
         self.configure(bg="gray")
         self.s = tk.Scrollbar(self)
-        self.t = tk.Text(self, height=20, width=70, relief="sunken", bg="#e6e6e6")
+        self.t = tk.Text(self, height=20, width=85, relief="sunken", bg="#e6e6e6")
         self.s.pack(side='right', fill='y')
         self.t.pack(side='left', fill='y')
         self.s.config(command=self.t.yview)
@@ -425,7 +426,7 @@ class EmployeeSearchPanel(tk.Frame):
             cursor.execute(sql, usr_entry)
             self.result = cursor.fetchall()
         cursor.close()
-        s = tabulate(self.result, headers=["ID", "First Name", "Last Name", "Email", "Type"], tablefmt="fancy_grid")
+        s = tabulate(self.result, headers=["ID", "First Name", "Last Name", "Email", "Type", "Location"], tablefmt="fancy_grid")
         return s
 
 
