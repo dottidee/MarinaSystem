@@ -1,0 +1,6 @@
+add employee panel:
+    add functionality to employee id input
+        5 digit number, first two digits are marina id last three are employee id
+    use marina id to find employee location
+        using the marina id specified in the first 2 digits of the employee id,
+        make a call to the db to find the location of that marina
