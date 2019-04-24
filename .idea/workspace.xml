@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5c7401e1-da6f-4a0c-9f42-2f18442c8aa1" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/MarinaSystem.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/MarinaSystem.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MainWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainWindow.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -29,8 +32,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/MainWindow.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="459" column="40" selection-start-line="459" selection-start-column="40" selection-end-line="459" selection-end-column="40" />
+            <state relative-caret-position="456">
+              <caret line="380" column="82" lean-forward="true" selection-start-line="375" selection-start-column="4" selection-end-line="380" selection-end-column="82" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
               </folding>
@@ -62,26 +65,16 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" fullScreen="true">
-    <option name="width" value="1440" />
-    <option name="height" value="900" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="y" value="28" />
+    <option name="width" value="1909" />
+    <option name="height" value="1007" />
   </component>
   <component name="ProjectView">
-    <navigator currentView="Scope" currentSubView="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope" proportions="" version="1">
+    <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="MarinaSystem" type="b2602c69:ProjectViewProjectNode" />
-              <item name="MarinaSystem" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
       <pane id="Scope">
         <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
           <expand>
@@ -93,6 +86,17 @@
               <item name="MarinaSystem" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
               <item name="~/Documents/GitHub/MarinaSystem" type="442cc68d:ScopeViewTreeModel$RootNode" />
               <item name=".idea" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="MarinaSystem" type="b2602c69:ProjectViewProjectNode" />
+              <item name="MarinaSystem" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -156,7 +160,7 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="24a5e370-8fac-49fd-95c7-6ec8e2f45665" name="Default Changelist" comment="" />
+      <changelist id="5c7401e1-da6f-4a0c-9f42-2f18442c8aa1" name="Default Changelist" comment="" />
       <created>1551364245246</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -171,21 +175,21 @@
     <option name="totallyTimeSpent" value="4665000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1440" height="900" extended-state="0" />
+    <frame x="0" y="23" width="1920" height="1012" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4990099" visible="true" weight="0.24947146" />
-      <window_info id="Structure" order="1" sideWeight="0.5009901" side_tool="true" weight="0.24960506" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4878837" visible="true" weight="0.16535018" />
+      <window_info id="Structure" order="1" sideWeight="0.5121163" side_tool="true" weight="0.16535018" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49964765" weight="0.17228916" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49612403" visible="true" weight="0.32891566" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49612403" visible="true" weight="0.32717392" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="8" sideWeight="0.49815693" weight="0.028846154" />
+      <window_info anchor="bottom" id="Version Control" order="8" sideWeight="0.49815693" weight="0.1" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.503876" side_tool="true" weight="0.32891566" />
       <window_info anchor="bottom" id="Terminal" order="11" />
@@ -211,6 +215,14 @@
               </option>
               <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
                 <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
               </option>
             </State>
           </value>
@@ -248,8 +260,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/MainWindow.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="459" column="40" selection-start-line="459" selection-start-column="40" selection-end-line="459" selection-end-column="40" />
+        <state relative-caret-position="456">
+          <caret line="380" column="82" lean-forward="true" selection-start-line="375" selection-start-column="4" selection-end-line="380" selection-end-column="82" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />
           </folding>

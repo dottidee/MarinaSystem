@@ -32,7 +32,7 @@ class FingerLakesSystem(tk.Tk):
         # connect to database
         self.connect_database()
         # load login page
-        self.switch_main_frame(LoginPage)
+        self.switch_main_frame(EmployeePage)
         self.disable_menu()
 
     def connect_database(self):
