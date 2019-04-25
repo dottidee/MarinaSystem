@@ -16,11 +16,12 @@ class MainWindow(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
         self.winfo_toplevel().title("Finger Lakes Marinas System")
+        # connect to database
+        self.connect_database()
         # add menu bar to left side
         self.menu_frame = MenuFrame(self)
         self.menu_frame.pack(side="top")
-        # connect to database
-        self.connect_database()
+
         # load customer page
         self.switch_main_frame(CustomerPage)
 
@@ -46,12 +47,11 @@ class MainWindow(tk.Tk):
                 return self.database
             # Catch all errors
             except mysql.connector.Error as err:
-                if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                    messagebox.showerror("Database Error", "Invalid user name or password")
-                elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                    messagebox.showerror("Database Error", "Database does not exist")
-                else:
-                    messagebox.showerror("Database Error", err)
+                m = messagebox.askretrycancel("Lost Connection to Server", "Failed to connect to remote database. Check your internet connection.")
+                if m is False:
+                    self.destroy()
+                    return
+
                 time.sleep(1)
 
     def activate_menu(self):
@@ -138,7 +138,7 @@ class CustomerPage(tk.Frame):
         tk.Frame.__init__(self, master)
         self.db = master.get_database()
         # Lookup Customer ---------------------------------------------------------------------------------
-        tk.Label(self, text="      Lookup Customer:      ", bg="black", fg="white").grid(row=0, column=0, columnspan=2)
+        tk.Label(self, text="      Lookup Customer:      ").grid(row=0, column=0, columnspan=2)
         # first name
         tk.Label(self, text="First Name:").grid(row=1, column=0, sticky="e")
         self.entry_fname = tk.Entry(self, width=12)
@@ -439,9 +439,9 @@ class CustomerDetailPopup(tk.Toplevel):
         self.edit_button.pack(side=tk.LEFT, padx=5, pady=5)
         w = tk.Button(box, text="Delete Customer", width=15, command=self.delete_customer)
         w.pack(side=tk.LEFT, padx=5, pady=5)
-        self.apply_button = tk.Button(box, text="Apply Changes", width=15, command=self.ok, state=tk.DISABLED)
+        self.apply_button = tk.Button(box, text="Apply Changes", width=15, command=self.ok)
         self.apply_button.pack(side=tk.LEFT, padx=5, pady=5)
-        self.close_button = tk.Button(box, text="Close", width=10, command=self.cancel, state=tk.ACTIVE)
+        self.close_button = tk.Button(box, text="Close", width=10, command=self.cancel)
         self.close_button.pack(side=tk.LEFT, padx=5, pady=5)
         self.bind("<Return>", self.cancel)
         self.bind("<Escape>", self.cancel)
@@ -495,8 +495,6 @@ class CustomerDetailPopup(tk.Toplevel):
         self.state.configure(state="normal")
         self.apply_button.configure(state="normal")
         self.bind("<Return>", self.ok)
-        self.close_button.configure(state=tk.NORMAL)
-        self.apply_button.configure(state=tk.ACTIVE)
         self.edit_button.configure(state=tk.DISABLED)
 
     def delete_customer(self):
