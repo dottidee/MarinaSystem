@@ -330,7 +330,13 @@ class CustomerSearchPanel(tk.Frame):
         # if only one customer found display detailed view
         if self.result.__len__() == 1:
             CustomerDetailPopup(self.master.master, db, self.result)
-
+            # update result in case of change
+            sql = "SELECT * FROM customer WHERE customer_id = %s"
+            usr_entry = (self.result[0][0],)
+            cursor = db.cursor()
+            cursor.execute(sql, usr_entry)
+            self.result = cursor.fetchall()
+            cursor.close()
         # only display first 6 columns
         for i in range(0, self.result.__len__()):
             self.result[i] = self.result[i][:7]
@@ -351,6 +357,7 @@ class CustomerDetailPopup(tk.Toplevel):
     customer = None
     apply_button = None
     edit_button = None
+    close_button = None
 
     def __init__(self, parent, db, result, title="Customer Details"):
         self.top = tk.Toplevel.__init__(self, parent)
@@ -423,9 +430,9 @@ class CustomerDetailPopup(tk.Toplevel):
         w.pack(side=tk.LEFT, padx=5, pady=5)
         self.apply_button = tk.Button(box, text="Apply Changes", width=15, command=self.ok, state=tk.DISABLED)
         self.apply_button.pack(side=tk.LEFT, padx=5, pady=5)
-        w = tk.Button(box, text="Close", width=10, command=self.cancel, default=tk.ACTIVE)
-        w.pack(side=tk.LEFT, padx=5, pady=5)
-        self.bind("<Return>", self.ok)
+        self.close_button = tk.Button(box, text="Close", width=10, command=self.cancel, state=tk.ACTIVE)
+        self.close_button.pack(side=tk.LEFT, padx=5, pady=5)
+        self.bind("<Return>", self.cancel)
         self.bind("<Escape>", self.cancel)
         box.pack()
 
@@ -475,7 +482,10 @@ class CustomerDetailPopup(tk.Toplevel):
         self.city.configure(state="normal")
         self.state.configure(state="normal")
         self.apply_button.configure(state="normal")
-        self.edit_button.configure(state="disabled")
+        self.bind("<Return>", self.ok)
+        self.close_button.configure(state=tk.NORMAL)
+        self.apply_button.configure(state=tk.ACTIVE)
+        self.edit_button.configure(state=tk.DISABLED)
 
     def delete_customer(self):
         # confirm removal
@@ -488,8 +498,7 @@ class CustomerDetailPopup(tk.Toplevel):
             cursor = self.db.cursor()
             cursor.execute(sql2, usr_entry)
             self.db.commit()
-            self.parent.focus_set()
-            self.destroy()
+            self.cancel()
 
 
 if __name__ == "__main__":
