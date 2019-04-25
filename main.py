@@ -183,8 +183,7 @@ class CustomerPage(tk.Frame):
         self.entry_id.delete(0, 'end')
 
     def add_customer(self):
-        w = AddCustomerPopup(self.master, self.db)
-        # self.wait_window(w.top)
+        AddCustomerPopup(self.master, self.db)
         self.update_search_panel(self.db, self.entry_fname.get(), self.entry_lname.get(),
                                  self.entry_id.get())
 
@@ -344,6 +343,7 @@ class CustomerSearchPanel(tk.Frame):
             # update result in case of change
             sql = "SELECT * FROM customer WHERE customer_id = %s"
             usr_entry = (self.result[0][0],)
+            db = self.master.master.connect_database()
             cursor = db.cursor()
             cursor.execute(sql, usr_entry)
             self.result = cursor.fetchall()
