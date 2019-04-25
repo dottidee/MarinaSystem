@@ -297,7 +297,7 @@ class CustomerSearchPanel(tk.Frame):
     t = None
     result = None
 
-    def __init__(self, master, db, f, l, id):
+    def __init__(self, master, db, f, l, x):
         tk.Frame.__init__(self, master)
         self.configure(bg="#e6e6e6")
         self.s = tk.Scrollbar(self)
@@ -307,7 +307,8 @@ class CustomerSearchPanel(tk.Frame):
         self.s.config(command=self.t.yview)
         self.t.config(yscrollcommand=self.s.set)
         # search database insert string into scrollbar
-        self.t.insert(tk.END, self.search(db, f, l, id))
+        #print(self.search(db, f, l, x))
+        self.t.insert(tk.INSERT, self.search(db, f, l, x))
         self.t.configure(state='disabled')
 
     # return string of search results
@@ -328,15 +329,14 @@ class CustomerSearchPanel(tk.Frame):
         cursor.close()
         # if only one customer found display detailed view
         if self.result.__len__() == 1:
-            w = CustomerDetailPopup(self.master, db, self.result)
-            self.wait_window(w.top)
-        else:
-            # only display first 6 columns
-            for i in range(0, self.result.__len__()):
-                self.result[i] = self.result[i][:7]
-            s = tabulate(self.result,
-                         headers=["ID", "First Name", "Last Name", "Phone", "Street", "City", "State"],
-                         tablefmt="simple")
+            CustomerDetailPopup(self.master.master, db, self.result)
+
+        # only display first 6 columns
+        for i in range(0, self.result.__len__()):
+            self.result[i] = self.result[i][:7]
+        s = tabulate(self.result,
+                     headers=["ID", "First Name", "Last Name", "Phone", "Street", "City", "State"],
+                     tablefmt="simple")
         return s
 
 
@@ -415,8 +415,7 @@ class CustomerDetailPopup(tk.Toplevel):
         self.state.configure(state="disabled")
 
     def buttonbox(self):
-        # add standard button box. override if you don't want the
-        # standard buttons
+        # add button box
         box = tk.Frame(self)
         self.edit_button = tk.Button(box, text="Edit Customer", width=15, command=self.enable_entries)
         self.edit_button.pack(side=tk.LEFT, padx=5, pady=5)
