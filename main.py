@@ -145,14 +145,14 @@ class CustomerPage(tk.Frame):
         self.entry_lname = tk.Entry(self, width=12)
         self.entry_lname.grid(row=2, column=1)
         # id
-        tk.Label(self, text="Customer id:").grid(row=3, column=0, sticky="e")
+        tk.Label(self, text="Customer ID:").grid(row=3, column=0, sticky="e")
         self.entry_id = tk.Entry(self, width=12)
         self.entry_id.grid(row=3, column=1)
         # clear button
-        tk.Button(self, text="Clear", padx=30,
+        tk.Button(self, text="Clear", padx=20,
                   command=lambda: self.clear_lookup_entry()).grid(row=4, column=0)
         # search button
-        tk.Button(self, text="Filter Results", padx=20,
+        tk.Button(self, text="Search", padx=20,
                   command=lambda: self.update_search_panel(self.db, self.entry_fname.get(), self.entry_lname.get(),
                                                            self.entry_id.get())).grid(row=4, column=1)
 
@@ -287,7 +287,7 @@ class AddCustomerPopup(tk.Toplevel):
 
 
 #
-# EmployeeSearchPanel Class
+# CustomerSearchPanel Class
 #
 class CustomerSearchPanel(tk.Frame):
     f_name = None
@@ -326,11 +326,171 @@ class CustomerSearchPanel(tk.Frame):
             cursor.execute(sql, usr_entry)
             self.result = cursor.fetchall()
         cursor.close()
-        s = tabulate(self.result,
-                     headers=["ID", "First Name", "Last Name", "Phone", "Street", "City", "State", "Boat List",
-                              "Slip List", "Service List", "Lease List"],
-                     tablefmt="simple")
+        # if only one customer found display detailed view
+        if self.result.__len__() == 1:
+            w = CustomerDetailPopup(self.master, db, self.result)
+            self.wait_window(w.top)
+        else:
+            # only display first 6 columns
+            for i in range(0, self.result.__len__()):
+                self.result[i] = self.result[i][:7]
+            s = tabulate(self.result,
+                         headers=["ID", "First Name", "Last Name", "Phone", "Street", "City", "State"],
+                         tablefmt="simple")
         return s
+
+
+class CustomerDetailPopup(tk.Toplevel):
+    db = None
+    f_name = None
+    l_name = None
+    phone = None
+    street = None
+    city = None
+    state = None
+    customer = None
+    apply_button = None
+    edit_button = None
+
+    def __init__(self, parent, db, result, title="Customer Details"):
+        self.top = tk.Toplevel.__init__(self, parent)
+        self.db = db
+        self.customer = result
+        self.transient(parent)
+        if title:
+            self.title(title)
+        self.parent = parent
+        self.result = None
+        body = tk.Frame(self)
+        self.initial_focus = self.body(body)
+        body.pack(padx=5, pady=5)
+        self.buttonbox()
+        self.grab_set()
+        if not self.initial_focus:
+            self.initial_focus = self
+        self.protocol("WM_DELETE_WINDOW", self.cancel)
+        self.geometry("+%d+%d" % (parent.winfo_rootx() + 50,
+                                  parent.winfo_rooty() + 50))
+        self.initial_focus.focus_set()
+        self.wait_window(self)
+
+    #
+    # construction hooks
+    def body(self, master):
+        tk.Label(master, text="First Name:").grid(row=0, sticky="e")
+        tk.Label(master, text="Last Name:").grid(row=1, sticky="e")
+        tk.Label(master, text="Phone #:").grid(row=2, sticky="e")
+        tk.Label(master, text="Street Address:").grid(row=3, sticky="e")
+        tk.Label(master, text="City:").grid(row=4, sticky="e")
+        tk.Label(master, text="State:").grid(row=5, sticky="e")
+
+        self.f_name = tk.Entry(master)
+        self.f_name.insert(tk.END, self.customer[0][1])
+        self.l_name = tk.Entry(master)
+        self.l_name.insert(tk.END, self.customer[0][2])
+        self.phone = tk.Entry(master)
+        self.phone.insert(tk.END, self.customer[0][3])
+        self.street = tk.Entry(master)
+        self.street.insert(tk.END, self.customer[0][4])
+        self.city = tk.Entry(master)
+        self.city.insert(tk.END, self.customer[0][5])
+        self.state = tk.Entry(master)
+        self.state.insert(tk.END, self.customer[0][6])
+        self.disable_entries()
+
+        self.f_name.grid(row=0, column=1)
+        self.l_name.grid(row=1, column=1)
+        self.phone.grid(row=2, column=1)
+        self.street.grid(row=3, column=1)
+        self.city.grid(row=4, column=1)
+        self.state.grid(row=5, column=1)
+        return self.f_name  # initial focus
+
+    def disable_entries(self):
+        self.f_name.configure(state="disabled")
+        self.l_name.configure(state="disabled")
+        self.phone.configure(state="disabled")
+        self.street.configure(state="disabled")
+        self.city.configure(state="disabled")
+        self.state.configure(state="disabled")
+
+    def buttonbox(self):
+        # add standard button box. override if you don't want the
+        # standard buttons
+        box = tk.Frame(self)
+        self.edit_button = tk.Button(box, text="Edit Customer", width=15, command=self.enable_entries)
+        self.edit_button.pack(side=tk.LEFT, padx=5, pady=5)
+        w = tk.Button(box, text="Delete Customer", width=15, command=self.delete_customer)
+        w.pack(side=tk.LEFT, padx=5, pady=5)
+        self.apply_button = tk.Button(box, text="Apply Changes", width=15, command=self.ok, state=tk.DISABLED)
+        self.apply_button.pack(side=tk.LEFT, padx=5, pady=5)
+        w = tk.Button(box, text="Close", width=10, command=self.cancel, default=tk.ACTIVE)
+        w.pack(side=tk.LEFT, padx=5, pady=5)
+        self.bind("<Return>", self.ok)
+        self.bind("<Escape>", self.cancel)
+        box.pack()
+
+    #
+    # standard button semantics
+    def ok(self, event=None):
+        if not self.validate():
+            self.initial_focus.focus_set()  # put focus back
+            return
+        self.withdraw()
+        self.update_idletasks()
+        self.apply()
+        self.cancel()
+
+    def cancel(self, event=None):
+        # put focus back to the parent window
+        self.parent.focus_set()
+        self.destroy()
+
+    #
+    # command hooks
+    def validate(self):
+        return 1  # override
+
+    def apply(self):
+        # confirm removal
+        msg_box = tk.messagebox.askquestion("Confirm Update",
+                                            "Are you sure you want to update this customer?\n",
+                                            icon='warning')
+        if msg_box == 'yes':
+            sql = "UPDATE customer SET first_name = %s, last_name = %s, phone = %s, street = %s, city = %s, state = %s WHERE customer_id = %s"
+            usr_entry = (
+                self.f_name.get(), self.l_name.get(), self.phone.get(), self.street.get(), self.city.get(),
+                self.state.get(),
+                self.customer[0][0])
+            cursor = self.db.cursor()
+            cursor.execute(sql, usr_entry)
+            self.db.commit()
+            self.parent.focus_set()
+            self.destroy()
+
+    def enable_entries(self):
+        self.f_name.configure(state="normal")
+        self.l_name.configure(state="normal")
+        self.phone.configure(state="normal")
+        self.street.configure(state="normal")
+        self.city.configure(state="normal")
+        self.state.configure(state="normal")
+        self.apply_button.configure(state="normal")
+        self.edit_button.configure(state="disabled")
+
+    def delete_customer(self):
+        # confirm removal
+        msg_box = tk.messagebox.askquestion("Confirm Removal",
+                                            "Are you sure you want to remove this customer? \n\nThis action cannot be undone.\n",
+                                            icon='warning')
+        if msg_box == 'yes':
+            sql2 = "DELETE FROM customer WHERE customer_id = %s"
+            usr_entry = (self.customer[0][0],)
+            cursor = self.db.cursor()
+            cursor.execute(sql2, usr_entry)
+            self.db.commit()
+            self.parent.focus_set()
+            self.destroy()
 
 
 if __name__ == "__main__":
