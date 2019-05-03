@@ -79,6 +79,8 @@ class DataBase:
     def add_customer(self, data):
         # all functions re-connect to prevent timeout
         self.connect()
+        # trim input data
+        data = self.trim_data(data)
         # SQL to add customer
         add_customer = ("INSERT INTO customer "
                         "(first_name, last_name, phone, street, city, state) "
@@ -109,6 +111,8 @@ class DataBase:
     def update_customer(self, data):
         # all functions re-connect to prevent timeout
         self.connect()
+        # trim data
+        data = self.trim_data(data)
         # SQL to update customer
         sql = "UPDATE customer SET first_name = %s, last_name = %s, phone = %s, street = %s, city = %s, state = %s WHERE customer_id = %s"
         # Execute
@@ -116,6 +120,16 @@ class DataBase:
         # Make sure data is committed to the database
         self.connector.commit()
         self.cursor.close()
+
+    #
+    #   @ param: data: list of values
+    #   @ return: same list with all values trimmed
+    #
+    def trim_data(self, data):
+        trimmed_data = list()
+        for str in data:
+            trimmed_data.append(str[:20])
+        return trimmed_data
 
 
 # FingerLakesSystem Class
