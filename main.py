@@ -323,7 +323,6 @@ class AddCustomerPopup(tk.Toplevel):
     #
     # construction hooks
     def body(self, master):
-        tk.Label(master, text="all fields cannot exceed 20 characters", fg="#990000").grid(row=0, columnspan=2)
         tk.Label(master, text="* First Name:").grid(row=1, sticky="e")
         tk.Label(master, text="* Last Name:").grid(row=2, sticky="e")
         tk.Label(master, text="* Phone #:").grid(row=3, sticky="e")
