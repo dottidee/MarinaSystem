@@ -35,6 +35,7 @@ class DataBase:
                 m = messagebox.askretrycancel("Lost Connection to Server",
                                               "Failed to connect to remote database. Check your internet connection.")
                 if m is False:
+                    # Known Issue: does not terminate application cleanly
                     app.destroy()
                     return
 
@@ -88,6 +89,9 @@ class DataBase:
         self.connector.commit()
         self.cursor.close()
 
+    #
+    #   @param: id: customer_id to delete
+    #
     def remove_customer(self, id):
         # all functions re-connect to prevent timeout
         self.connect()
@@ -189,6 +193,7 @@ class MenuFrame(tk.Frame):
 
 #
 # ServicePage Class
+# Not implemented
 #
 class ServicePage(tk.Frame):
     def __init__(self, master):
@@ -198,6 +203,7 @@ class ServicePage(tk.Frame):
 
 #
 # SlipPage Class
+# Not implemented
 #
 class SlipPage(tk.Frame):
     def __init__(self, master):
@@ -207,6 +213,7 @@ class SlipPage(tk.Frame):
 
 #
 # CustomerPage Class
+# Holds Lookup Customer entries/buttons and CustomerSearchPanel
 #
 class CustomerPage(tk.Frame):
     cur_search_frame = None
@@ -267,6 +274,10 @@ class CustomerPage(tk.Frame):
                                  self.entry_id.get())
 
 
+#
+# AddCustomerPopup class
+# Toplevel popup with entries and buttons to add a customer
+#
 class AddCustomerPopup(tk.Toplevel):
     f_name = None
     l_name = None
@@ -365,6 +376,7 @@ class AddCustomerPopup(tk.Toplevel):
 
 #
 # CustomerSearchPanel Class
+# Holds Scrolling Canvas to display customers
 #
 class CustomerSearchPanel(tk.Frame):
     f_name = None
@@ -410,6 +422,10 @@ class CustomerSearchPanel(tk.Frame):
         return s
 
 
+#
+# CustomerDetailPopup
+# Toplevel popup, shows single customer's details and allows user to modify or delete customer
+#
 class CustomerDetailPopup(tk.Toplevel):
     customer = None
     f_name = None
