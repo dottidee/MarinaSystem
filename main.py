@@ -127,8 +127,8 @@ class DataBase:
     #
     def trim_data(self, data):
         trimmed_data = list()
-        for str in data:
-            trimmed_data.append(str[:20])
+        for string in data:
+            trimmed_data.append(str(string)[:20])
         return trimmed_data
 
 
@@ -323,26 +323,27 @@ class AddCustomerPopup(tk.Toplevel):
     #
     # construction hooks
     def body(self, master):
-        tk.Label(master, text="* First Name:").grid(row=0, sticky="e")
-        tk.Label(master, text="* Last Name:").grid(row=1, sticky="e")
-        tk.Label(master, text="* Phone #:").grid(row=2, sticky="e")
-        tk.Label(master, text="Street Address:").grid(row=3, sticky="e")
-        tk.Label(master, text="City:").grid(row=4, sticky="e")
-        tk.Label(master, text="State:").grid(row=5, sticky="e")
+        tk.Label(master, text="all fields cannot exceed 20 characters", fg="#990000").grid(row=0, columnspan=2)
+        tk.Label(master, text="* First Name:").grid(row=1, sticky="e")
+        tk.Label(master, text="* Last Name:").grid(row=2, sticky="e")
+        tk.Label(master, text="* Phone #:").grid(row=3, sticky="e")
+        tk.Label(master, text="Street Address:").grid(row=4, sticky="e")
+        tk.Label(master, text="City:").grid(row=5, sticky="e")
+        tk.Label(master, text="State:").grid(row=6, sticky="e")
 
-        self.f_name = tk.Entry(master)
-        self.l_name = tk.Entry(master)
-        self.phone = tk.Entry(master)
-        self.street = tk.Entry(master)
-        self.city = tk.Entry(master)
-        self.state = tk.Entry(master)
+        self.f_name = tk.Entry(master, width=15)
+        self.l_name = tk.Entry(master, width=15)
+        self.phone = tk.Entry(master, width=15)
+        self.street = tk.Entry(master, width=15)
+        self.city = tk.Entry(master, width=15)
+        self.state = tk.Entry(master, width=15)
 
-        self.f_name.grid(row=0, column=1)
-        self.l_name.grid(row=1, column=1)
-        self.phone.grid(row=2, column=1)
-        self.street.grid(row=3, column=1)
-        self.city.grid(row=4, column=1)
-        self.state.grid(row=5, column=1)
+        self.f_name.grid(row=1, column=1)
+        self.l_name.grid(row=2, column=1)
+        self.phone.grid(row=3, column=1)
+        self.street.grid(row=4, column=1)
+        self.city.grid(row=5, column=1)
+        self.state.grid(row=6, column=1)
         return self.f_name  # initial focus
 
     def buttonbox(self):
@@ -516,11 +517,11 @@ class CustomerDetailPopup(tk.Toplevel):
     def buttonbox(self):
         # add button box
         box = tk.Frame(self)
-        self.edit_button = tk.Button(box, text="Edit Customer", width=15, command=self.enable_entries)
-        self.edit_button.pack(side=tk.LEFT, padx=5, pady=5)
         w = tk.Button(box, text="Delete Customer", width=15, command=self.delete_customer)
         w.pack(side=tk.LEFT, padx=5, pady=5)
-        self.apply_button = tk.Button(box, text="Apply Changes", width=15, command=self.ok)
+        self.edit_button = tk.Button(box, text="Edit Customer", width=15, command=self.enable_entries)
+        self.edit_button.pack(side=tk.LEFT, padx=5, pady=5)
+        self.apply_button = tk.Button(box, text="Apply Changes", width=15, command=self.ok, state=tk.DISABLED)
         self.apply_button.pack(side=tk.LEFT, padx=5, pady=5)
         self.close_button = tk.Button(box, text="Close", width=10, command=self.cancel)
         self.close_button.pack(side=tk.LEFT, padx=5, pady=5)
