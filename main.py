@@ -7,17 +7,121 @@ from mysql.connector import errorcode
 from tabulate import tabulate
 
 
+# DataBase Class will handle all interactions with the database
+# All SQL code should be written here
+class DataBase:
+    connector = None
+    cursor = None
+
+    def __init__(self):
+        self.connector = None
+        self.cursor = None
+
+    def connect(self):
+        # Connect to remote database
+        while 1:
+            try:
+
+                self.connector = mysql.connector.connect(
+                    host="remotemysql.com",
+                    user="3rybg59bIE",
+                    password="Rb8WxAwcfD",
+                    database="3rybg59bIE"
+                )
+                self.cursor = self.connector.cursor()
+                return
+            # Catch all errors
+            except mysql.connector.Error as err:
+                m = messagebox.askretrycancel("Lost Connection to Server",
+                                              "Failed to connect to remote database. Check your internet connection.")
+                if m is False:
+                    app.destroy()
+                    return
+
+                time.sleep(1)
+
+    #
+    #   @param: data: list containing customer_id, f_name, l_name
+    #
+    def search_customer(self, data):
+        # all functions re-connect to prevent timeout
+        self.connect()
+        result = None
+        i = data[0]
+        # if given id
+        if i is not "":
+            # SQL to search customer using id
+            sql = "SELECT * FROM customer WHERE customer_id = %s"
+            # Execute
+            self.cursor.execute(sql, (i,))
+            result = self.cursor.fetchall()
+            # Make sure data is committed to the database
+            self.connector.commit()
+            self.cursor.close()
+        else:
+            f = data[1]
+            l = data[2]
+            # SQL to search customer using names
+            sql = "SELECT * FROM customer WHERE first_name LIKE %s AND last_name LIKE %s ORDER BY last_name ASC"
+            usr_entry = (f + "%", l + "%")
+            # Execute
+            self.cursor.execute(sql, usr_entry)
+            result = self.cursor.fetchall()
+            # Make sure data is committed to the database
+            self.connector.commit()
+            self.cursor.close()
+        return result
+
+    #
+    #   @param: data: list containing f_name, l_name, phone, street, city, state
+    #
+    def add_customer(self, data):
+        # all functions re-connect to prevent timeout
+        self.connect()
+        # SQL to add customer
+        add_customer = ("INSERT INTO customer "
+                        "(first_name, last_name, phone, street, city, state) "
+                        "VALUES (%s, %s, %s, %s, %s, %s)")
+        # Execute - Insert new employee
+        self.cursor.execute(add_customer, data)
+        # Make sure data is committed to the database
+        self.connector.commit()
+        self.cursor.close()
+
+    def remove_customer(self, id):
+        # all functions re-connect to prevent timeout
+        self.connect()
+        # SQL to remove customer
+        sql = "DELETE FROM customer WHERE customer_id = %s"
+        # Execute
+        self.cursor.execute(sql, (id,))
+        # Make sure data is committed to the database
+        self.connector.commit()
+        self.cursor.close()
+
+    #
+    #   @param: data: list containing f_name, l_name, phone, street, city, state, customer_id to update
+    #
+    def update_customer(self, data):
+        # all functions re-connect to prevent timeout
+        self.connect()
+        # SQL to update customer
+        sql = "UPDATE customer SET first_name = %s, last_name = %s, phone = %s, street = %s, city = %s, state = %s WHERE customer_id = %s"
+        # Execute
+        self.cursor.execute(sql, data)
+        # Make sure data is committed to the database
+        self.connector.commit()
+        self.cursor.close()
+
+
 # FingerLakesSystem Class
 # Acts as system's Main Window, contains a menu frame and a main frame
 class MainWindow(tk.Tk):
     main_frame = None
-    database = None
 
     def __init__(self):
         tk.Tk.__init__(self)
         self.winfo_toplevel().title("Finger Lakes Marinas System")
-        # connect to database
-        self.connect_database()
         # add menu bar to left side
         self.menu_frame = MenuFrame(self)
         self.menu_frame.pack(side="top")
@@ -34,34 +138,11 @@ class MainWindow(tk.Tk):
         self.main_frame.pack(side="top")
         self.activate_menu()
 
-    def connect_database(self):
-        # Connect to remote database
-        while 1:
-            try:
-                self.database = mysql.connector.connect(
-                    host="remotemysql.com",
-                    user="3rybg59bIE",
-                    password="Rb8WxAwcfD",
-                    database="3rybg59bIE"
-                )
-                return self.database
-            # Catch all errors
-            except mysql.connector.Error as err:
-                m = messagebox.askretrycancel("Lost Connection to Server", "Failed to connect to remote database. Check your internet connection.")
-                if m is False:
-                    self.destroy()
-                    return
-
-                time.sleep(1)
-
     def activate_menu(self):
         self.menu_frame.activate()
 
     def disable_menu(self):
         self.menu_frame.disable()
-
-    def get_database(self):
-        return self.database
 
 
 #
@@ -129,14 +210,12 @@ class SlipPage(tk.Frame):
 #
 class CustomerPage(tk.Frame):
     cur_search_frame = None
-    db = None
     entry_fname = None
     entry_lname = None
     entry_id = None
 
     def __init__(self, master):
         tk.Frame.__init__(self, master)
-        self.db = master.get_database()
         # Lookup Customer ---------------------------------------------------------------------------------
         tk.Label(self, text="      Lookup Customer:      ").grid(row=0, column=0, columnspan=2)
         # first name
@@ -156,11 +235,11 @@ class CustomerPage(tk.Frame):
                   command=lambda: self.clear_lookup_entry()).grid(row=4, column=0)
         # search button
         self.bind("<Return>",
-                  (lambda event: self.update_search_panel(self.db, self.entry_fname.get(), self.entry_lname.get(),
+                  (lambda event: self.update_search_panel(self.entry_fname.get(), self.entry_lname.get(),
                                                           self.entry_id.get())))
 
         tk.Button(self, text="Search", padx=20,
-                  command=lambda: self.update_search_panel(self.db, self.entry_fname.get(), self.entry_lname.get(),
+                  command=lambda: self.update_search_panel(self.entry_fname.get(), self.entry_lname.get(),
                                                            self.entry_id.get())).grid(row=4, column=1)
 
         # Add Customer ---------------------------------------------------------------------------------
@@ -168,10 +247,10 @@ class CustomerPage(tk.Frame):
                                                                                                    columnspan=2)
 
         # initially show all customers
-        self.update_search_panel(self.db, "", "", "")
+        self.update_search_panel("", "", "")
 
-    def update_search_panel(self, db, f, l, id):
-        new_frame = CustomerSearchPanel(self, db, f, l, id)
+    def update_search_panel(self, f, l, id):
+        new_frame = CustomerSearchPanel(self, f, l, id)
         if self.cur_search_frame is not None:
             self.cur_search_frame.destroy()
         self.cur_search_frame = new_frame
@@ -183,13 +262,12 @@ class CustomerPage(tk.Frame):
         self.entry_id.delete(0, 'end')
 
     def add_customer(self):
-        AddCustomerPopup(self.master, self.db)
-        self.update_search_panel(self.db, self.entry_fname.get(), self.entry_lname.get(),
+        AddCustomerPopup(self.master)
+        self.update_search_panel(self.entry_fname.get(), self.entry_lname.get(),
                                  self.entry_id.get())
 
 
 class AddCustomerPopup(tk.Toplevel):
-    db = None
     f_name = None
     l_name = None
     phone = None
@@ -197,9 +275,8 @@ class AddCustomerPopup(tk.Toplevel):
     city = None
     state = None
 
-    def __init__(self, parent, db, title="Add Customer"):
+    def __init__(self, parent, title="Add Customer"):
         self.top = tk.Toplevel.__init__(self, parent)
-        self.db = db
         self.transient(parent)
         if title:
             self.title(title)
@@ -278,18 +355,10 @@ class AddCustomerPopup(tk.Toplevel):
 
     def apply(self):
         if self.f_name.get() is not "" and self.l_name.get() is not "" and self.phone.get() is not "":
-            self.db = self.master.connect_database()
-            cursor = self.db.cursor()
-            add_employee = ("INSERT INTO customer "
-                            "(first_name, last_name, phone, street, city, state) "
-                            "VALUES (%s, %s, %s, %s, %s, %s)")
-            data_employee = (self.f_name.get(), self.l_name.get(), self.phone.get(), self.street.get(), self.city.get(),
+            db = DataBase()
+            customer_data = (self.f_name.get(), self.l_name.get(), self.phone.get(), self.street.get(), self.city.get(),
                              self.state.get())
-            # Insert new employee
-            cursor.execute(add_employee, data_employee)
-            # Make sure data is committed to the database
-            self.db.commit()
-            cursor.close()
+            db.add_customer(customer_data)
         else:
             messagebox.showerror("Error", "Customer must have a first name, last name and phone number.")
 
@@ -305,7 +374,7 @@ class CustomerSearchPanel(tk.Frame):
     t = None
     result = None
 
-    def __init__(self, master, db, f, l, x):
+    def __init__(self, master, f, l, x):
         tk.Frame.__init__(self, master)
         self.configure(bg="#e6e6e6")
         self.s = tk.Scrollbar(self)
@@ -316,38 +385,22 @@ class CustomerSearchPanel(tk.Frame):
         self.t.config(yscrollcommand=self.s.set)
         # search database insert string into scrollbar
         # print(self.search(db, f, l, x))
-        self.t.insert(tk.INSERT, self.search(db, f, l, x))
+        self.t.insert(tk.INSERT, self.search(f, l, x))
         self.t.configure(state='disabled')
 
     # return string of search results
-    def search(self, db, f, l, i):
-        if i is not "":
-            sql = "SELECT * FROM customer WHERE customer_id = %s"
-            usr_entry = (i,)
-            db = self.master.master.connect_database()
-            cursor = db.cursor()
-            cursor.execute(sql, usr_entry)
-            self.result = cursor.fetchall()
-            cursor.close()
-        else:
-            sql = "SELECT * FROM customer WHERE first_name LIKE %s AND last_name LIKE %s ORDER BY last_name ASC"
-            usr_entry = (f + "%", l + "%")
-            db = self.master.master.connect_database()
-            cursor = db.cursor()
-            cursor.execute(sql, usr_entry)
-            self.result = cursor.fetchall()
-            cursor.close()
+    def search(self, f, l, i):
+        db = DataBase()
+        self.result = db.search_customer((i, f, l))
         # if only one customer found display detailed view
         if self.result.__len__() == 1:
-            CustomerDetailPopup(self.master.master, db, self.result)
+            CustomerDetailPopup(self.master.master, self.result)
             # update result in case of change
-            sql = "SELECT * FROM customer WHERE customer_id = %s"
-            usr_entry = (self.result[0][0],)
-            db = self.master.master.connect_database()
-            cursor = db.cursor()
-            cursor.execute(sql, usr_entry)
-            self.result = cursor.fetchall()
-            cursor.close()
+            self.result = db.search_customer((self.result[0][0], "", ""))
+            # if customer was deleted result = all customers
+            if self.result.__len__() == 0:
+                self.result = db.search_customer(("", "", ""))
+                self.master.clear_lookup_entry()
         # only display first 6 columns
         for i in range(0, self.result.__len__()):
             self.result[i] = self.result[i][:7]
@@ -358,21 +411,19 @@ class CustomerSearchPanel(tk.Frame):
 
 
 class CustomerDetailPopup(tk.Toplevel):
-    db = None
+    customer = None
     f_name = None
     l_name = None
     phone = None
     street = None
     city = None
     state = None
-    customer = None
     apply_button = None
     edit_button = None
     close_button = None
 
-    def __init__(self, parent, db, result, title="Customer Details"):
+    def __init__(self, parent, result, title="Customer Details"):
         self.top = tk.Toplevel.__init__(self, parent)
-        self.db = db
         self.customer = result
         self.transient(parent)
         if title:
@@ -474,15 +525,12 @@ class CustomerDetailPopup(tk.Toplevel):
                                             "Are you sure you want to update this customer?\n",
                                             icon='warning')
         if msg_box == 'yes':
-            sql = "UPDATE customer SET first_name = %s, last_name = %s, phone = %s, street = %s, city = %s, state = %s WHERE customer_id = %s"
             usr_entry = (
                 self.f_name.get(), self.l_name.get(), self.phone.get(), self.street.get(), self.city.get(),
                 self.state.get(),
                 self.customer[0][0])
-            self.db = self.master.connect_database()
-            cursor = self.db.cursor()
-            cursor.execute(sql, usr_entry)
-            self.db.commit()
+            db = DataBase()
+            db.update_customer(usr_entry)
             self.parent.focus_set()
             self.destroy()
 
@@ -503,12 +551,8 @@ class CustomerDetailPopup(tk.Toplevel):
                                             "Are you sure you want to remove this customer? \n\nThis action cannot be undone.\n",
                                             icon='warning')
         if msg_box == 'yes':
-            sql2 = "DELETE FROM customer WHERE customer_id = %s"
-            usr_entry = (self.customer[0][0],)
-            self.db = self.master.connect_database()
-            cursor = self.db.cursor()
-            cursor.execute(sql2, usr_entry)
-            self.db.commit()
+            db = DataBase()
+            db.remove_customer(self.customer[0][0])
             self.cancel()
 
 
